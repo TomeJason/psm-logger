@@ -1,7 +1,7 @@
 {
-    "name": "socket-chat-example",
+    "name": "psm-viewer",
     "version": "0.0.1",
-    "description": "my first socket.io app",
+    "description": "Receive, log, and visualize broadcasted psm messages",
     "dependencies": {
         "body-parser": "^1.18.3",
         "express": "^4.16.3",
