@@ -22,7 +22,7 @@ var onLED = new Gpio(5, 'out');
 var config;
 var udpClient;
 var fs = require('fs');
-const execSync = require('child_process').execSync;
+const exec = require('child_process').exec;
 
 
 var handlePSM = (psm) => {
@@ -42,14 +42,17 @@ var decodePSM = (psm) => {
     if(!decodePSM.count) decodePSM.count = 0;
     decodePSM.count++;
     var verbose = false;
-    if(decodePSM.count % 50 == 0) {
+    if(decodePSM.count % 1 == 0) {
       verbose = true;
       console.log("count: ", decodePSM.count);
     }
     //we have psm message frame checker
     try {
-      execSync(`./isMsgFrame ${psm.toString('hex')} ${verbose ? '-d' : ''}`, {stdio:[0,1,2]});
-    } catch(err) {
+      exec(`./isMsgFrame ${psm.toString('hex')} ${verbose ? '-d' : ''}`, 
+	function (error, stdout, stderr) {
+          console.log(stdout);
+      });
+ } catch(err) {
       return 1
     }
     return 0;
