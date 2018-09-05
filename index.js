@@ -15,6 +15,33 @@ client.once('ready', function () {
   // client.flushdb();
 });
 
+
+var port = process.env.PORT || 8080;
+
+// Start the Server
+http.listen(port, function () {
+  console.log('Server Started. Listening on *:' + port);
+});
+
+// Express Middleware
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+// Render Main HTML file
+app.get('/', function (req, res) {
+  res.sendFile('views/index.html', {
+    root: __dirname
+  });
+});
+
+// Socket Connection
+// UI Stuff
+io.on('connection', function (socket) {
+
+});
+
 var Gpio = require('onoff').Gpio;
 var blinkLED = new Gpio(12, 'out'); // Corresponds to Pin #32
 var onLED = new Gpio(5, 'out');
@@ -42,7 +69,7 @@ var decodePSM = (psm) => {
     if (!decodePSM.count) decodePSM.count = 0;
     decodePSM.count++;
     var verbose = false;
-    if (decodePSM.count % 1 == 0) {
+    if (decodePSM.count % 10 == 0) {
       verbose = true;
       console.log("count: ", decodePSM.count);
     }
@@ -50,7 +77,7 @@ var decodePSM = (psm) => {
     try {
       exec(`./isMsgFrame ${psm.toString('hex')} ${verbose ? '-d' : ''}`,
         function (error, stdout, stderr) {
-          console.log(stdout);
+          parseMessage(stdout);
         });
     } catch (err) {
       return 1
@@ -63,6 +90,26 @@ var decodePSM = (psm) => {
   }
 
 }
+
+var parseMessage = (message) => {
+  var psm = {
+    value: {
+      position: {},
+      accuracy: {}
+    }
+  };
+  psm.messageId = message.match(/messageId: (\d+)/)[1];
+  psm.value.basicType = message.match(/basicType: (\d+)/)[1];
+  psm.value.secMark = message.match(/secMark: (\d+)/)[1];
+  psm.value.msgCnt = message.match(/msgCnt: (\d+)/)[1];
+  psm.value.id = message.match(/messageId: (\d+)/)[1];
+  psm.value.position.lat = message.match(/lat: (\d+)/)[1];
+  psm.value.position.long = message.match(/long: (\d+)/)[1];
+  psm.value.accuracy.semiMajor = message.match(/semiMajor: (\d+)/)[1];
+  psm.value.accuracy.semiMinor = message.match(/semiMinor: (\d+)/)[1];
+  psm.value.accuracy.orientation = message.match(/orientation: (\d+)/)[1];
+  psm.value.speed = message.match(/speed: (\d+)/)[1];
+  psm.value.heading = message.match(/heading: (\d+)/)[1];
 
 var blink = () => {
   //using functions as objects is a workaround for using static variables
@@ -183,29 +230,3 @@ if (require.main === module) {
 } else {
   //called as module
 }
-
-var port = process.env.PORT || 8080;
-
-// Start the Server
-http.listen(port, function () {
-  console.log('Server Started. Listening on *:' + port);
-});
-
-// Express Middleware
-app.use(express.static('public'));
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
-
-// Render Main HTML file
-app.get('/', function (req, res) {
-  res.sendFile('views/index.html', {
-    root: __dirname
-  });
-});
-
-// Socket Connection
-// UI Stuff
-io.on('connection', function (socket) {
-
-});
