@@ -5,13 +5,13 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var redis = require('redis');
 
-require('./public/js/decode.js');
+var decoder = require('./public/js/decode.js');
 
 client = redis.createClient();
 
 // Redis Client Ready
 client.once('ready', function () {
-
+  decoder.startDecoder();
   // Flush Redis DB
   // client.flushdb();
 });
