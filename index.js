@@ -6,12 +6,12 @@ var io = require('socket.io')(http);
 var redis = require('redis');
 
 var decoder = require('./public/js/decode.js');
+decoder.startDecoder();
 
 client = redis.createClient();
 
 // Redis Client Ready
 client.once('ready', function () {
-  decoder.startDecoder();
   // Flush Redis DB
   // client.flushdb();
 });
