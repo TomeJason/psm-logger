@@ -1,0 +1,12 @@
+{
+  "socket": {
+    "host": "localhost",
+    "port": 8888
+  },
+  "enabled": {
+    "serial": true,
+    "socket": true,
+    "stdin": false
+  },
+  "BLINK_LENGTH": 50
+}

@@ -11,18 +11,18 @@ $(function () {
     readFile = function () {
         var reader = new FileReader();
         reader.onload = function () {
-            var arr = reader.result.split('\n');     
+            var arr = reader.result.split('\n');
 
             var dataObj = [];
             var headers = arr[0].split(',');
-            $.each(headers, function( index, value ) {
-                headers[index] = value.trim();              
+            $.each(headers, function (index, value) {
+                headers[index] = value.trim();
             });
 
-            for(var i = 1; i < arr.length; i++) {
+            for (var i = 1; i < arr.length; i++) {
                 var data = arr[i].split(',');
                 var obj = {};
-                for(var j = 0; j < data.length; j++) {
+                for (var j = 0; j < data.length; j++) {
                     obj[headers[j].trim()] = data[j].trim();
                 }
                 dataObj.push(obj);
@@ -32,40 +32,40 @@ $(function () {
             var table = '';
 
             for (var index = 0; index < headers.length; index++) {
-                if (index === 0){
+                if (index === 0) {
                     table += '<thead>';
                 }
                 table += '<th>';
                 table += headers[index];
                 table += '</th>';
-                if (index === headers.length - 1){
+                if (index === headers.length - 1) {
                     table += '</thead>';
                 }
             }
 
-            $.each(dataObj[index], function( index, value ) {
+            $.each(dataObj[index], function (index, value) {
                 table += '<td>';
                 table += value;
-                table += '</td>';               
+                table += '</td>';
             });
 
             for (var index = 0; index < dataObj.length; index++) {
-                
+
                 table += '<tr>';
 
-                $.each(dataObj[index], function( index, value ) {
+                $.each(dataObj[index], function (index, value) {
                     table += '<td>';
                     table += value;
-                    table += '</td>';               
+                    table += '</td>';
                 });
- 
+
                 table += '</tr>';
             }
 
             document.getElementById('psm-data').innerHTML = table;
 
             // add markers to map
-            $.each(dataObj, function( index, psm ) {
+            $.each(dataObj, function (index, psm) {
                 addMarker(psm);
             });
 
@@ -86,7 +86,7 @@ $(function () {
 
     // listen for csv file to be selected
     fileInput.addEventListener('change', readFile);
-    
+
     /**  
         Create all leaflet stuff and add all markers to map (need to integrate with redis)
     */
@@ -121,7 +121,7 @@ $(function () {
     };
 
     $('#clear').click(function () {
-        map.eachLayer(function(layer){
+        map.eachLayer(function (layer) {
             map.removeLayer(layer);
         });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
