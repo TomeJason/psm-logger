@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var flatten = require('flat');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -71,7 +72,7 @@ var decodePSM = (psm) => {
     try {
       exec(`./isMsgFrame ${psm.toString('hex')} -d`,
         function (error, stdout, stderr) {
-          parseMessage(stdout);
+          toRedis(stdout);
         });
     } catch (err) {
       return 1
@@ -84,26 +85,33 @@ var decodePSM = (psm) => {
   }
 }
 
-var parseMessage = (message) => {
-  var psm = {
-    value: {
-      position: {},
-      accuracy: {}
+var dbIndex = 0;
+var toRedis = (message) => {
+  client.hmset(
+    `${dbIndex}`,
+    "messageId", message.match(/messageId: (\d+)/)[1],
+    "value.basicType", message.match(/basicType: (\d+)/)[1],
+    "value.secMark", message.match(/secMark: (\d+)/)[1],
+    "value.msgCnt", message.match(/msgCnt: (\d+)/)[1],
+    "value.id", message.match(/messageId: (\d+)/)[1],
+    "value.position.lat", message.match(/lat: (\d+)/)[1],
+    "value.position.long", message.match(/long: (\d+)/)[1],
+    "value.accuracy.semiMajor", message.match(/semiMajor: (\d+)/)[1],
+    "value.accuracy.semiMinor", message.match(/semiMinor: (\d+)/)[1],
+    "value.accuracy.orientation", message.match(/orientation: (\d+)/)[1],
+    "value.speed", message.match(/speed: (\d+)/)[1],
+    "value.heading", message.match(/heading: (\d+)/)[1],
+    function (err, res) { dbIndex++ }
+  );
+
+  client.hgetall(`${dbIndex - 1}`, function (error, result) {
+    if (error) {
+      console.log(error);
+      throw error;
     }
-  };
-  psm.messageId = message.match(/messageId: (\d+)/)[1];
-  psm.value.basicType = message.match(/basicType: (\d+)/)[1];
-  psm.value.secMark = message.match(/secMark: (\d+)/)[1];
-  psm.value.msgCnt = message.match(/msgCnt: (\d+)/)[1];
-  psm.value.id = message.match(/messageId: (\d+)/)[1];
-  psm.value.position.lat = message.match(/lat: (\d+)/)[1];
-  psm.value.position.long = message.match(/long: (\d+)/)[1];
-  psm.value.accuracy.semiMajor = message.match(/semiMajor: (\d+)/)[1];
-  psm.value.accuracy.semiMinor = message.match(/semiMinor: (\d+)/)[1];
-  psm.value.accuracy.orientation = message.match(/orientation: (\d+)/)[1];
-  psm.value.speed = message.match(/speed: (\d+)/)[1];
-  psm.value.heading = message.match(/heading: (\d+)/)[1];
-  console.log(psm);
+    console.log(dbIndex - 1);
+    console.log(flatten.unflatten(result));
+  });
 }
 
 var blink = () => {
